@@ -9,14 +9,22 @@ x-airflow-common:
   &airflow-common
   image: apache/airflow:2.9.3
   environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__CORE__FERNET_KEY=my_personal_fernet_key_12345
-    - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=True
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
-    - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-    # Optional: add useful Python deps for custom DAGs
-    - _PIP_ADDITIONAL_REQUIREMENTS=apache-airflow-providers-snowflake apache-airflow-providers-amazon boto3 pandas python-dotenv
+    - AIRFLOW__CORE__EXECUTOR=
+    - AIRFLOW__CORE__FERNET_KEY=
+    - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=
+    - AIRFLOW__CORE__LOAD_EXAMPLES=
+    - AIRFLOW__API__AUTH_BACKENDS=
+    - AIRFLOW__CORE__BASE_URL=
+    - AIRFLOW__LOGGING__REMOTE_LOGGING=
+    - AIRFLOW__CORE__LOGGING_LEVEL=
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=
+    - _PIP_ADDITIONAL_REQUIREMENTS=
+    - USE_SNOWFLAKE=
+    - AWS_REGION=
+    - S3_BUCKET_NAME=
+    - S3_RAW_DATA_PATH=
+    - AWS_ACCESS_KEY_ID=
+    - AWS_SECRET_ACCESS_KEY=
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

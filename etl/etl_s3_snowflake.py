@@ -16,9 +16,9 @@ USE_SNOWFLAKE = os.getenv("USE_SNOWFLAKE", "false").lower() == "true"
 import boto3
 from botocore.exceptions import ClientError
 
-AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
-S3_BUCKET = os.getenv("S3_BUCKET_NAME", "")
-S3_PREFIX = os.getenv("S3_PREFIX", "data/raw/")  # optional prefix in bucket
+AWS_REGION = os.getenv("AWS_REGION")
+S3_BUCKET = os.getenv("S3_BUCKET_NAME")
+S3_PREFIX = os.getenv("S3_RAW_DATA_PATH")
 
 # Snowflake
 SNOW_USER = os.getenv("SNOWFLAKE_USER")
@@ -26,7 +26,7 @@ SNOW_PWD = os.getenv("SNOWFLAKE_PASSWORD")
 SNOW_ACCOUNT = os.getenv("SNOWFLAKE_ACCOUNT")
 SNOW_WAREHOUSE = os.getenv("SNOWFLAKE_WAREHOUSE")
 SNOW_DATABASE = os.getenv("SNOWFLAKE_DATABASE")
-SNOW_SCHEMA = os.getenv("SNOWFLAKE_SCHEMA", "PUBLIC")
+SNOW_SCHEMA = os.getenv("SNOWFLAKE_SCHEMA")
 
 RAW_DIR = Path("data/raw")
 PROCESSED_DIR = Path("data/processed")
