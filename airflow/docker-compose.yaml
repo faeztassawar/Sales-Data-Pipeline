@@ -1,0 +1,88 @@
+# ---------------------------------------------
+# Apache Airflow (LocalExecutor) - Clean Setup
+# ---------------------------------------------
+# Access UI: http://localhost:8081
+# Default login: admin / admin
+# ---------------------------------------------
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.9.3
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__FERNET_KEY=my_personal_fernet_key_12345
+    - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=True
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    # Optional: add useful Python deps for custom DAGs
+    - _PIP_ADDITIONAL_REQUIREMENTS=apache-airflow-providers-snowflake apache-airflow-providers-amazon boto3 pandas python-dotenv
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  user: "${AIRFLOW_UID:-50000}:0"
+
+services:
+  # PostgreSQL database for Airflow metadata
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Initializes Airflow DB and creates admin user
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    entrypoint: bash
+    command:
+      - -c
+      - |
+        airflow db upgrade &&
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Faez \
+          --lastname Tassawar \
+          --role Admin \
+          --email tassawarfaez@gmail.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Airflow web interface
+  webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8081:8080"  # Expose UI on localhost:8081
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+
+  # Airflow scheduler (runs your DAGs)
+  scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-db-volume:
