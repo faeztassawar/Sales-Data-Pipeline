@@ -9,6 +9,8 @@ venv/
 *.sqlite
 *.db
 
+*.key
+
 data/raw/*
 data/processed/*
 data/warehouse/*
